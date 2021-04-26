@@ -2,6 +2,9 @@ using NUnit.Framework;
 using OpenQA.Selenium;
 using System.Threading;
 using System.Collections.Generic;
+using OpenQA.Selenium.Support.UI;
+using System;
+using SeleniumExtras.WaitHelpers;
 
 namespace TestProject2
 {
@@ -52,7 +55,7 @@ namespace TestProject2
         #endregion
 
 
-        void CoronavirusFormFillInputFields(By element, string elementText)
+        void CoronavirusForm_FillInputFields(By element, string elementText)
         {
             CoronavirusFormElements.Remove(element);
             driver.FindElement(_newsButton).Click();
@@ -65,11 +68,11 @@ namespace TestProject2
             driver.FindElement(_coronaFormTermsOfServiceCheckbox).Click();
             driver.FindElement(_coronaFormSubmitButton).Click();
             CoronavirusFormElements.Add(element, elementText);
-            Thread.Sleep(1000);
+            new WebDriverWait(driver, TimeSpan.FromSeconds(1)).Until(ExpectedConditions.ElementIsVisible(_coronaFormErrorInputMessage));
             var error = driver.FindElement(_coronaFormErrorInputMessage).Text;
             Assert.IsTrue(error.Contains(expectedErrorInputFieldText) && (_coronaFormNameInputField != null || _coronaFormEmailInputField != null));
         }
-        void CoronavirusFormCheckboxCheck(By element)
+        void CoronavirusForm_CheckboxCheck(By element)
         {
             driver.FindElement(_newsButton).Click();
             driver.FindElement(_coronavirusButton).Click();
@@ -82,12 +85,12 @@ namespace TestProject2
             if (element != _coronaFormTermsOfServiceCheckbox)
                 driver.FindElement(_coronaFormTermsOfServiceCheckbox).Click();
             driver.FindElement(_coronaFormSubmitButton).Click();
-            Thread.Sleep(1000);
+            new WebDriverWait(driver, TimeSpan.FromSeconds(1)).Until(ExpectedConditions.ElementIsVisible(_coronaFormErrorCheckBoxMessage));
             var error = driver.FindElement(_coronaFormErrorCheckBoxMessage).Text;
             Assert.IsTrue(error.Contains(expectedErrorCheckboxText));
         }
 
-        void CoronavirusFormCheckInputFormInvalidData(By element, string data)
+        void CoronavirusForm_CheckInput_InvalidData(By element, string data)
         {
             string elementOriginalData;
             CoronavirusFormElements.TryGetValue(element, out elementOriginalData);
@@ -104,7 +107,7 @@ namespace TestProject2
             driver.FindElement(_coronaFormSubmitButton).Click();
             CoronavirusFormElements.Remove(element);
             CoronavirusFormElements.Add(element, elementOriginalData);
-            Thread.Sleep(1000);
+            new WebDriverWait(driver, TimeSpan.FromSeconds(1)).Until(ExpectedConditions.ElementIsVisible(_coronaFormErrorCheckBoxMessage));
             var error = driver.FindElement(_coronaFormErrorInputMessage).Text;
             Assert.IsTrue(error.Contains(expectedErrorInputFieldText) && (_coronaFormNameInputField != null || _coronaFormEmailInputField != null));
         }
@@ -142,15 +145,9 @@ namespace TestProject2
             int actualAmount = 0;
             var elements = driver.FindElements(_secondaryTitles);
             for (int i = 0; i < elements.Count; i++)
-            {
                 for (int j = 0; j < _secondaryArticleTiles.Count; j++)
-                {
                     if (elements[i].Text==_secondaryArticleTiles[j])
-                    {
                         actualAmount++;
-                    }
-                }
-            }
             Assert.AreEqual(expectedAmount, actualAmount, "Headers doesnt exist" + actualAmount + ", " + expectedAmount);
         }
         [Test]
@@ -168,39 +165,39 @@ namespace TestProject2
         [Test]
         public void CoronavirusFormEmptyTextFieldTest()
         {
-            CoronavirusFormFillInputFields(_coronaFormTextInputField, coronaFormText);
+            CoronavirusForm_FillInputFields(_coronaFormTextInputField, coronaFormText);
         }
 
         [Test]
         public void CoronavirusFormEmptyNameFieldTest()
         {
-            CoronavirusFormFillInputFields(_coronaFormNameInputField, coronaFormName);
+            CoronavirusForm_FillInputFields(_coronaFormNameInputField, coronaFormName);
         }
         
         [Test]
         public void CoronavirusFormEmptyEmailFieldTest()
         {
-            CoronavirusFormFillInputFields(_coronaFormEmailInputField, coronaFormEmail);
+            CoronavirusForm_FillInputFields(_coronaFormEmailInputField, coronaFormEmail);
         }
         [Test]
         public void CoronavirusFormEmptyPhoneNumberFieldTest()
         {
-            CoronavirusFormFillInputFields(_coronaFormPhoneNumInputField, coronaFormPhoneNumber);
+            CoronavirusForm_FillInputFields(_coronaFormPhoneNumInputField, coronaFormPhoneNumber);
         }
         [Test]
         public void CoronavirusFormInactiveAgeCheckboxFieldTest()
         {
-            CoronavirusFormCheckboxCheck(_coronaFormAgeCheckbox);
+            CoronavirusForm_CheckboxCheck(_coronaFormAgeCheckbox);
         }
         [Test]
         public void CoronavirusFormInactiveTermsOfServiceCheckboxFieldTest()
         {
-            CoronavirusFormCheckboxCheck(_coronaFormTermsOfServiceCheckbox);
+            CoronavirusForm_CheckboxCheck(_coronaFormTermsOfServiceCheckbox);
         }
         [Test]
         public void CoronavirusFormEmailFieldInvalidDataTest()
         {
-            CoronavirusFormCheckInputFormInvalidData(_coronaFormEmailInputField, "--");
+            CoronavirusForm_CheckInput_InvalidData(_coronaFormEmailInputField, "--");
         }
 
         [TearDown]
@@ -208,6 +205,5 @@ namespace TestProject2
         {
            driver.Quit();
         }
-        
     }
 }
